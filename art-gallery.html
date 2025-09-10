@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>neurOrange – Gallery</title>
+<style>
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;-webkit-font-smoothing:antialiased;}
+.page-bar{position:fixed;top:0;left:0;right:0;display:flex;gap:.75rem;align-items:center;padding:.6rem .9rem;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);z-index:50}
+.btn{color:#fff;text-decoration:none;font-weight:700;cursor:pointer;padding:.45rem .7rem;border-radius:.5rem;background:rgba(255,255,255,.10);backdrop-filter:blur(8px)}
+.card{background:rgba(0,0,0,.35);backdrop-filter:blur(10px);padding:1rem;border-radius:1rem}
+.wrap{padding:4.2rem 1rem 1rem} .viewer{display:grid;place-items:center}
+.stage{width:min(92vw,680px);aspect-ratio:4/3;border-radius:1rem;overflow:hidden;background:rgba(0,0,0,.3);backdrop-filter:blur(6px)}
+.stage img{width:100%;height:100%;object-fit:cover;display:block}
+.controls{display:flex;justify-content:center;gap:.75rem;margin-top:.75rem}
+#outro{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center}
+#outro.fade{transition:opacity 2s ease}
+#quote{text-align:center;white-space:pre-line;font-weight:900;font-style:italic;letter-spacing:.02em;font-size:clamp(18px,5.2vw,30px);line-height:1.25;color:#FFA64D;text-shadow:0 0 10px rgba(0,0,0,.8),0 0 30px rgba(255,166,77,.25);opacity:0}
+</style>
+</head>
+<body>
+  <div class="page-bar">
+    <a class="btn" onclick="routeWithFade('index.html')">← Home</a>
+    <div style="flex:1"></div>
+    <a class="btn" onclick="routeWithFade('color-library.html#hex=FFA500')">Color Library</a>
+  </div>
+
+  <div class="wrap">
+    <div class="viewer">
+      <div class="stage card"><img id="img" alt="painting"></div>
+      <div class="controls">
+        <a class="btn" id="prev">◀︎ Prev</a>
+        <a class="btn" id="next">Next ▶︎</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="outro"><div id="quote">In a world full of yellows and reds
+Dare to be orange</div></div>
+
+<script>
+function routeWithFade(url){
+  const o=document.getElementById('outro'), q=document.getElementById('quote');
+  o.classList.remove('fade'); o.style.opacity=0; o.style.pointerEvents='none'; q.style.transition='none'; q.style.opacity=0;
+  requestAnimationFrame(()=>{o.classList.add('fade');o.style.opacity=1;o.style.pointerEvents='auto';
+    setTimeout(()=>{q.style.transition='opacity 1.2s ease';q.style.opacity=1},400);
+    setTimeout(()=>{q.style.transition='opacity 1.75s ease';q.style.opacity=0},1600);
+    setTimeout(()=>{location.href=url},3700);});
+}
+function getHashParams(){const h=(location.hash||'').replace(/^#/,'');const m=new URLSearchParams(h);return{painting:(m.get('painting')||'').trim()}}
+const P=[1,2,3,4,5,6].map(i=>`assets/paintings/${i}.jpg`);
+let idx=0; function load(){const p=parseInt(getHashParams().painting||'1',10);idx=Math.min(P.length-1,Math.max(0,(isFinite(p)?p:1)-1));document.getElementById('img').src=P[idx];}
+function next(){idx=(idx+1)%P.length; location.hash=`painting=${idx+1}`;} function prev(){idx=(idx-1+P.length)%P.length; location.hash=`painting=${idx+1}`;}
+document.getElementById('next').addEventListener('click', next); document.getElementById('prev').addEventListener('click', prev);
+addEventListener('hashchange', load); load();
+</script>
+</body>
+</html>

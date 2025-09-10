@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>neurOrange – Color Library</title>
+<style>
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;-webkit-font-smoothing:antialiased;}
+.page-bar{position:fixed;top:0;left:0;right:0;display:flex;gap:.75rem;align-items:center;padding:.6rem .9rem;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);z-index:50}
+.btn{color:#fff;text-decoration:none;font-weight:700;cursor:pointer;padding:.45rem .7rem;border-radius:.5rem;background:rgba(255,255,255,.10);backdrop-filter:blur(8px)}
+.card{background:rgba(0,0,0,.35);backdrop-filter:blur(10px);padding:1rem;border-radius:1rem}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;padding:4.5rem 1rem 1.25rem}
+.swatch{aspect-ratio:1/1;border-radius:.9rem;position:relative;cursor:pointer;box-shadow:0 0 0 2px rgba(0,0,0,.85)}
+.swatch .label{position:absolute;bottom:.4rem;left:.5rem;right:.5rem;font-weight:700;text-shadow:0 1px 3px #000}
+.selected{outline:3px solid #fff; outline-offset:2px}
+.preview{display:flex;align-items:center;justify-content:center;gap:1rem;padding:1rem;margin:4rem 1rem 0}
+.preview .chip{width:64px;height:64px;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.9)}
+#outro{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:999;display:flex;align-items:center;justify-content:center}
+#outro.fade{transition:opacity 2s ease}
+#quote{text-align:center;white-space:pre-line;font-weight:900;font-style:italic;letter-spacing:.02em;font-size:clamp(18px,5.2vw,30px);line-height:1.25;color:#FFA64D;text-shadow:0 0 10px rgba(0,0,0,.8),0 0 30px rgba(255,166,77,.25);opacity:0}
+</style>
+</head>
+<body>
+  <div class="page-bar">
+    <a class="btn" onclick="backHome()">← Home</a>
+    <div style="flex:1"></div>
+    <a class="btn" onclick="routeWithFade('art-gallery.html#painting=1')">Go to Gallery</a>
+  </div>
+
+  <div class="preview card">
+    <div id="chip" class="chip"></div>
+    <div>
+      <div id="hexLabel" style="font-weight:900"></div>
+      <div id="nameLabel" style="opacity:.8"></div>
+    </div>
+  </div>
+
+  <div id="swatches" class="grid"></div>
+
+  <div id="outro"><div id="quote">In a world full of yellows and reds
+Dare to be orange</div></div>
+
+<script>
+function routeWithFade(url){
+  const o=document.getElementById('outro'), q=document.getElementById('quote');
+  o.classList.remove('fade'); o.style.opacity=0; q.style.transition='none'; q.style.opacity=0; o.style.pointerEvents='none';
+  requestAnimationFrame(()=>{o.classList.add('fade');o.style.opacity=1;o.style.pointerEvents='auto';
+    setTimeout(()=>{q.style.transition='opacity 1.2s ease';q.style.opacity=1},400);
+    setTimeout(()=>{q.style.transition='opacity 1.75s ease';q.style.opacity=0},1600);
+    setTimeout(()=>{location.href=url},3700);});
+}
+function backHome(){ routeWithFade('index.html'); }
+function getHashParams(){const h=(location.hash||'').replace(/^#/,'');const m=new URLSearchParams(h);return{hex:(m.get('hex')||'').trim()}}
+function hexNorm(h){return (h||'').replace(/^#/,'').toUpperCase()} function ensureHex(h){return '#'+hexNorm(h)}
+
+const BRIGHT=[
+  {name:"Pantone 021 C",hex:"#FE5000"},{name:"Pure Orange",hex:"#FFA500"},{name:"Solar Orange",hex:"#FF8E00"},
+  {name:"Nickelodeon",hex:"#FF6600"},{name:"Fanta Orange",hex:"#FF6A00"},{name:"Firefox",hex:"#FF9400"},
+  {name:"Tangerine",hex:"#F28500"},{name:"Tiger Orange",hex:"#FF7F24"},{name:"Carrot",hex:"#ED9121"},
+  {name:"Amber",hex:"#FFBF00"},{name:"Safety Orange",hex:"#FF5E00"},{name:"Signal Orange",hex:"#FF6A13"}
+];
+
+function render(){
+  const {hex}=getHashParams(); const target=ensureHex(hex||'FFA64D');
+  const grid=document.getElementById('swatches'), chip=document.getElementById('chip'), hexLabel=document.getElementById('hexLabel'), nameLabel=document.getElementById('nameLabel');
+  grid.innerHTML='';
+  BRIGHT.forEach(c=>{const d=document.createElement('div'); d.className='swatch'; d.style.background=c.hex;
+    if(hexNorm(c.hex)===hexNorm(target)) d.classList.add('selected');
+    d.innerHTML=`<div class="label">${c.name}<br>${c.hex}</div>`; d.addEventListener('click',()=>{location.hash=`hex=${hexNorm(c.hex)}`; render();}); grid.appendChild(d);});
+  const sel=BRIGHT.find(c=>hexNorm(c.hex)===hexNorm(target))||{name:'Custom',hex:target}; chip.style.background=sel.hex; hexLabel.textContent=sel.hex; nameLabel.textContent=sel.name;
+}
+render(); addEventListener('hashchange',render);
+</script>
+</body>
+</html>
