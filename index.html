@@ -1,176 +1,290 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>neurOrange — Home</title>
-<style>
-  :root{ --bergamot:#FFA64D; --pantone021:#FE5000; --nick:#FF6600;
-         --gap-deg:3deg; --inner-thick:34px; --outer-thick-mult:2.2; --emoji-font:18px;
-         --glow:0 0 10px #000, 0 0 18px #000; }
-  *{box-sizing:border-box} html,body{margin:0;height:100%;background:#000;color:#fff;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;-webkit-font-smoothing:antialiased;overflow:hidden}
-  #phone{position:fixed;inset:0;display:grid;place-items:center}
-  #canvas{position:relative;width:100%;height:100%;overflow:hidden;background:#000}
-  #brandBar{position:absolute;left:0;right:0;top:10px;display:flex;justify-content:center;z-index:6;filter:drop-shadow(var(--glow))}
-  #brand{font-weight:900;letter-spacing:.12em;font-size:clamp(18px,5vw,32px);color:#FFA500}
-  #bgLayer{position:absolute;inset:0;z-index:1}
-  #bgVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
-  .fogWrap{position:absolute;inset:-30%;z-index:0;pointer-events:none;-webkit-mask-image:radial-gradient(circle at 50% 50%,rgba(0,0,0,1) 62%,rgba(0,0,0,0) 100%);mask-image:radial-gradient(circle at 50% 50%,rgba(0,0,0,1) 62%,rgba(0,0,0,0) 100%)}
-  .fog{position:absolute;inset:0;mix-blend-mode:screen;filter:blur(60px) saturate(120%);
-       background:radial-gradient(28% 22% at 20% 30%,var(--nick) 0 55%,transparent 60%),radial-gradient(28% 24% at 80% 40%,var(--nick) 0 55%,transparent 60%),radial-gradient(30% 22% at 40% 70%,var(--nick) 0 55%,transparent 60%);animation:fog1 26s linear infinite alternate;opacity:.62}
-  @keyframes fog1{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-3%,-4%) scale(1.08)}}
-  #focus{position:absolute;inset:0;display:grid;place-items:center;z-index:2}
-  .wrapCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-  .spin{position:absolute;inset:0}
-  .halo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;
-        background:radial-gradient(closest-side,rgba(0,0,0,.35),rgba(0,0,0,0));filter:blur(10px);pointer-events:none;z-index:-1}
-  #question{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);display:grid;place-items:center;background:#000;color:#fff;border-radius:50%;border:none;z-index:5;filter:drop-shadow(var(--glow));padding:.4rem .6rem;cursor:pointer}
-  #questionText{font-weight:900;font-style:italic;text-align:center;font-size:clamp(16px,3.6vw,22px);line-height:1.15;margin:0;animation:pulse 3s ease-in-out infinite}
-  @keyframes pulse{0%,100%{color:var(--bergamot)}50%{color:var(--pantone021)}}
-  #innerWrap{z-index:2} #innerSpin{animation:spinCW 60s linear infinite;filter:drop-shadow(var(--glow))}
-  @keyframes spinCW{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  #innerSurface{position:absolute;inset:0;border-radius:50%;
-    -webkit-mask:radial-gradient(circle,transparent calc(50% - var(--inner-thick)),#000 calc(50% - var(--inner-thick)),#000 calc(50% + var(--inner-thick)),transparent calc(50% + var(--inner-thick)));
-            mask:radial-gradient(circle,transparent calc(50% - var(--inner-thick)),#000 calc(50% - var(--inner-thick)),#000 calc(50% + var(--inner-thick)),transparent calc(50% + var(--inner-thick)))}
-  #innerHits{position:absolute;inset:0;pointer-events:none} #innerHits .hit{pointer-events:auto;cursor:pointer}
-  #outerWrap{z-index:3} #outerSpin{animation:spinCW 70s linear infinite} #outerSurface{position:absolute;inset:0;border-radius:50%}
-  #outerHits{position:absolute;inset:0;pointer-events:none} #outerHits .hit{pointer-events:auto;cursor:pointer}
-  #emojiWrapA,#emojiWrapB{z-index:4} .emojiRing{position:absolute;inset:0} .emojiSpin{position:absolute;inset:0;animation:spinCCW var(--dur,60s) linear infinite}
-  @keyframes spinCCW{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
-  .emoji{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:var(--emoji-font);border:none;border-radius:10px;background:rgba(0,0,0,.08);padding:1px 3px;filter:drop-shadow(0 0 8px #000) drop-shadow(0 0 14px #000);cursor:pointer}
-  #midWrap{z-index:8} #midSpin{animation:spinCCW 56s linear infinite;filter:drop-shadow(var(--glow))} #midRing{position:absolute;inset:0}
-  .mnode{position:absolute;top:50%;left:50%;border-radius:50%;transform:translate(-50%,-50%);background:#111;overflow:hidden;border:1.5px solid #000;filter:drop-shadow(var(--glow));cursor:pointer}
-  .mnode.withCloud::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% + 16px);height:calc(100% + 16px);border-radius:inherit;background:radial-gradient(closest-side,rgba(0,0,0,.38),rgba(0,0,0,0));filter:blur(8px);pointer-events:none}
-  .mnode img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%;animation:upright 56s linear infinite;transform-origin:center;backface-visibility:hidden;will-change:transform}
-  @keyframes upright{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  #outro{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:10;display:flex;align-items:center;justify-content:center}
-  #outro.fade{transition:opacity 2s ease}
-  #quote{text-align:center;white-space:pre-line;font-weight:900;font-style:italic;letter-spacing:.02em;font-size:clamp(18px,5.2vw,30px);line-height:1.25;color:#FFA64D;text-shadow:0 0 10px rgba(0,0,0,.8),0 0 30px rgba(255,166,77,.25);opacity:0}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Orange Gallery Popouts</title>
+  <style>
+    /* Base styles to ensure the gallery fits nicely on a portrait phone */
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100%;
+      overflow: hidden;
+    }
+    /* Wrapper for the entire app */
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background-image: url('gallery.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+    /* Carousel container */
+    #carousel {
+      position: relative;
+      width: 100%;
+      height: 35vh;
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Each slide */
+    .slide {
+      flex: 0 0 60%;
+      margin: 0 10px;
+      scroll-snap-align: center;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+    .slide img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+    }
+    /* Caption bar */
+    #caption {
+      width: 90%;
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 8px;
+      font-size: 14px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    /* Modal overlay */
+    #modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(2px);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #modal img {
+      max-width: 90vw;
+      max-height: 50vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+    }
+    #modal .analysis {
+      margin-top: 10px;
+      width: 90vw;
+      max-height: 30vh;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: justify;
+    }
+    #modal .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    #modal .swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    #modal .close {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <div id="phone">
-    <div id="canvas">
-      <div id="brandBar"><div id="brand">neurOrange</div></div>
-      <div id="bgLayer">
-        <video id="bgVideo" muted playsinline webkit-playsinline preload="auto"></video>
-        <div class="fogWrap"><div class="fog"></div></div>
-      </div>
-      <div id="focus">
-        <div id="outerWrap" class="wrapCenter"><div id="outerSpin" class="spin"><div id="outerSurface"></div></div><svg id="outerHits" viewBox="0 0 1000 1000"></svg><div class="halo" id="outerHalo"></div></div>
-        <div id="innerWrap" class="wrapCenter"><div id="innerSpin" class="spin"><div id="innerSurface"></div></div><svg id="innerHits" viewBox="0 0 1000 1000"></svg><div class="halo" id="innerHalo"></div></div>
-        <div id="cometField" class="wrapCenter"></div>
-        <div id="midWrap" class="wrapCenter"><div id="midSpin" class="spin"><div id="midRing"></div></div></div>
-        <div id="emojiWrapA" class="wrapCenter"><div class="emojiSpin" style="--dur:56s"><div id="emojiRingA" class="emojiRing"></div></div></div>
-        <div id="emojiWrapB" class="wrapCenter"><div class="emojiSpin" style="--dur:82s; transform: rotate(-12deg)"><div id="emojiRingB" class="emojiRing"></div></div></div>
-        <div id="question"><div id="questionText">What are you<br/>feeling?</div></div>
-      </div>
-      <div id="outro"><div id="quote">In a world full of yellows and reds
-Dare to be orange</div></div>
-    </div>
+  <div id="app">
+    <div id="carousel"></div>
+    <div id="caption"></div>
   </div>
+  <div id="modal">
+    <span class="close">×</span>
+    <img id="modalImg" alt="" />
+    <div class="analysis" id="modalText"></div>
+    <div class="swatches" id="swatchRow"></div>
+  </div>
+  <script>
+    // Parsed descriptions from Picture_desc.txt. Each object contains
+    // a title, hook, analysis, and palette (array of hex strings).
+    const descriptions = [
+      {
+        "title": "Contemporary Abstract Drip Painting (Radial Burst of Orange)",
+        "hook": "A riotous explosion of color radiates from the canvas center, as if a sunburst has been captured mid-eruption. Searing oranges meld with molten reds and yellows, punctuated by electric cyan splashes, creating a visceral sense of heat, motion, and centrifugal force that grabs the viewer with its raw energy.",
+        "analysis": "This contemporary abstract drip painting channels the spirit of Jackson Pollock’s action painting in a modern idiom. The artist employs vigorous dripping and splattering techniques reminiscent of mid-20th-century Abstract Expressionism, yet imposes a radial composition that focuses the chaotic motion into a burst emanating from the center. The piece belongs to the lineage of kinetic abstraction – paintings that convey a sense of movement – building on Pollock’s idea of “energy and motion made visible” through paint. In this work, the painter’s background in expressive, process-driven art is evident: the canvas becomes an arena of dynamic gesture, where gravity, chance, and the artist’s choreography combine to create an explosive focal point of color. The compositional choice of a centralized burst sets this work apart from all-over drip paintings. Warm pigments – fiery orange, red, and golden yellow – dominate the core, splattering outward in looping trajectories. These hot colors are contrasted by staccato drops of cyan blue, their complementary opposite. The effect is both visually striking and emotionally charged: the cyan accents make the surrounding oranges appear even more intense. The paint appears to have been applied in spontaneous, dance-like flings; yet the roughly circular symmetry suggests the artist intentionally orchestrated the chaos into a sunburst pattern. This balance between accident and design imbues the painting with both freedom and focus. Orange is the lifeblood of this composition, saturating it with meaning. In color theory and cultural symbolism, orange often connotes energy, urgency, and vitality. Here the swirls of orange feel like pure creative force unleashed – a visual metaphor for ignition or birth. The radiating design reinforces this feeling of an emerging light or idea. In this context, the orange core could be interpreted as a symbolic sun – a wellspring of creation – sending out waves of inspiration. Overall, the bold use of orange in this drip painting serves to galvanize the viewer’s emotions. It creates an atmosphere of warmth and excitement, making the canvas pulse with life.",
+        "palette": ["#FF4500", "#FF8C00", "#FFC107", "#FFAE42", "#FFA500"]
+      },
+      {
+        "title": "The Fighting Temeraire (1839) – J.M.W. Turner",
+        "hook": "In Turner’s The Fighting Temeraire, an old warship glides toward its twilight under a sky ablaze with orange. The painting’s glowing sunset – equal parts beauty and melancholy – floods the scene with golden haze, casting the dying day as an elegy for the magnificent vessel’s final journey.",
+        "analysis": "Joseph Mallord William Turner, a luminary of British Romanticism, painted The Fighting Temeraire as a tribute to a celebrated warship from the Battle of Trafalgar. By 1838 the once-mighty Temeraire was obsolete, towed up the Thames to be scrapped. Turner seized on this event to explore the passing of an era. Historically, the work reflects the dawn of industrial modernity: the age of sail yielding to the age of steam. The blazing sunset that consumes the right side of the canvas is anything but incidental – Turner invents a sumptuous sky to imbue the scene with symbolic weight. The veteran ship, rendered in ghostly whites and pale golds, is hauled by a small black steam tug. This poignant contrast encapsulates the theme of old giving way to new. Compositionally, Turner bathes the Temeraire in the last light of the setting sun. The sky dominates: billowing clouds are drenched in oranges, coppers, and reds, their reflections dancing on the calm water below. The emotional and symbolic function of orange here is profound: a visual poem of farewell – the color of dusk doubling as the color of nostalgia and death. The fiery sunset becomes a radiant ending that is both mournful and resplendent, marking the end of a ship’s life and an epoch in naval history.",
+        "palette": ["#FFD6A5", "#FF9900", "#FF4500", "#B87333", "#8B4513"]
+      },
+      {
+        "title": "Café Terrace at Night — Vincent van Gogh, 1888",
+        "hook": "Orange and green collide in this feverish nocturne; Van Gogh turns a humble bar into a blazing psychological furnace.",
+        "analysis": "Painted in Arles during his burst of creativity in September 1888, Van Gogh’s Café Terrace at Night sought to depict the 'terrible passions of humanity' without resorting to black. He bathed the scene in red-orange gaslight and offset it with emerald shadows, employing skewed perspective and thick halos around the lamps to convey claustrophobia and moral heat. The color orange here functions as psychic temperature: it is both the glow of gas lamps and the feverish tension of the café’s patrons. The complementary dissonance of orange and green heightens the sense of restlessness and nocturnal unease. Van Gogh used orange not only as warmth but also as warning – a hue that hints at vice and insomnia.",
+        "palette": ["#FFF1B0", "#FFBF00", "#FF8C00", "#CC7722", "#8B4513"]
+      },
+      {
+        "title": "Beginning (1958) – Kenneth Noland",
+        "hook": "Concentric rings of color focus on a vermilion core—color as genesis and meditation.",
+        "analysis": "Noland’s 'Beginning' circles gradually saturate from cool hues to warm, concentrating into an orange-red center that pulses like a living heart. As a Color Field painter, Noland emphasized how pure color can be an optical and emotional experience. The warm core radiates intensity, while the surrounding cool rings echo and amplify it. Orange here suggests both inception and stability; it is at once the starting point and the gravitational anchor of the composition. The painting invites contemplation of how color relationships evoke feelings of expansion and contraction.",
+        "palette": ["#EEC900", "#FFA500", "#FF7F50", "#FF4500", "#8B4513"]
+      },
+      {
+        "title": "Canna Red and Orange (1924) – Georgia O’Keeffe",
+        "hook": "Petals swell into landscape—orange opens like breath taken deeply for the first time.",
+        "analysis": "In this close-up of a canna lily blossom, O’Keeffe magnifies petals until color and curve become the subject itself. The dominant orange tones move from dark firebrick to light apricot, modulating the petal folds like a sensual landscape. O’Keeffe uses orange as life force—embracing both passion and radiance—and invites viewers to feel the warmth and vitality of the bloom. Her controlled paint handling and radical cropping turn the flower into a monument of color and line.",
+        "palette": ["#B22222", "#FF4500", "#FF8C00", "#FFA07A", "#FFD1A1"]
+      },
+      {
+        "title": "The Night Café — Vincent van Gogh, 1888",
+        "hook": "A bar turned furnace: orange walls and jaundiced lamps generate feverish heat under green shadows.",
+        "analysis": "Van Gogh’s The Night Café portrays a drinking establishment as a place of both vice and insomnia. Rather than neutrals, he juxtaposes tomato orange-red walls against a sickly green table and lamps, producing vibrations that reflect moral unease. The skewed perspective and looming billiard table intensify the claustrophobia. Orange becomes the oppressive glow clinging to walls and figures, symbolizing the simmering passions and psychological discomfort of sleepless nights. It’s a painting of restless heat, where orange conveys both seduction and sickness.",
+        "palette": ["#FF6347", "#FF4500", "#CD5C5C", "#FF8C00", "#C04000"]
+      },
+      {
+        "title": "Kleine Welten (Small Worlds) — Wassily Kandinsky, 1922",
+        "hook": "Geometric actors—grids, vectors, circles—perform across a warm orange stage, orchestrating color like music.",
+        "analysis": "Kandinsky’s Kleine Welten series explores how simple shapes build entire universes. Here, a warm ochre-to-orange ground provides the base for checkered grids, piercing black diagonals, and floating circles. Following his theories from Point and Line to Plane, colors and shapes carry inherent spiritual qualities: orange represents the energy of red tempered by the joy of yellow. In this composition, orange serves as the resonant bass note underpinning a visual composition that invites synesthetic interpretation—invoking both sound and color.",
+        "palette": ["#FFB347", "#FFA500", "#FF8C00", "#FF4500", "#8B4513"]
+      },
+      {
+        "title": "Flaming June — Frederic Leighton, 1895",
+        "hook": "A sleeping figure wrapped in orange silk—summer’s heat made human.",
+        "analysis": "Leighton’s Flaming June depicts a woman sleeping on a marble bench, her drapery a translucent blaze of orange. The painting captures the languor of a Mediterranean summer and the intense warmth of a setting sun. The orange fabric dominates the composition, embodying both sensuality and serenity; it is luminous yet heavy, suggesting heat and slumber. The color reads as an embodiment of June itself—fiery yet restful—turning the reclining figure into a personification of summer’s dreamlike bliss.",
+        "palette": ["#DA6E00", "#F59000", "#FFA500", "#FFC04D", "#FFE1A5"]
+      },
+      {
+        "title": "Untitled (SF-356) — Sam Francis, c. 1980s",
+        "hook": "Interlocking organic shapes drip and splatter across a field, punctuated by bursts of orange energy.",
+        "analysis": "San Francis’s abstract works often explore the tension between white space and expressive color. This untitled piece from the 1980s features layered drips and biomorphic forms in ultramarine, magenta, and green, with orange punctuations that animate the composition. The orange bursts serve as energetic accents amid cooler hues, energizing the picture plane and guiding the eye in swirling rhythms. They recall Francis’s interest in the emotional impact of color and the spontaneous gesture.",
+        "palette": ["#FF4500", "#FF8C00", "#FFB347", "#FFCC80", "#FFF8DC"]
+      },
+      {
+        "title": "Radial Burst (Contemporary Abstract Drip)",
+        "hook": "A controlled chaos of splattered paint radiates from the center, fiery oranges balanced by electric blues.",
+        "analysis": "This companion to the first abstract drip piece features a central explosion of orange and red complemented by arcs of cyan and teal. The radial design unifies the dynamic drips into a sun-like form, capturing both the spontaneity of action painting and the structure of a planned composition. Orange takes center stage again, representing pure kinetic energy and passion, while the cooler tones provide balance and depth. The interplay of warm and cool echoes the phenomenon where complementary colors intensify each other’s vibration.",
+        "palette": ["#FF4500", "#FF8C00", "#FFC107", "#008B8B", "#00CED1"]
+      },
+      {
+        "title": "Synchromy in Orange: To Form — Stanton MacDonald-Wright, 1914",
+        "hook": "An orchestration of glowing oranges and verdant greens radiate like a musical chord made visible.",
+        "analysis": "A founder of the Synchromist movement, MacDonald-Wright sought to parallel painting with music. In this pioneering work, he employs swirling bands of orange, red, and yellow intercut with emerald greens to create a vibrant harmony. Orange provides the dominant tone, modulating through cadmium and burnt sienna, signifying both warmth and motion. The dynamic composition recalls a musical crescendo, with color functioning like a chorus. The painting stands as one of the earliest abstract works in American modernism and demonstrates how orange can evoke emotion through rhythm and luminosity.",
+        "palette": ["#FF6633", "#FF8C00", "#FFA500", "#FFD700", "#008000"]
+      },
+      {
+        "title": "Target with Four Faces — Jasper Johns, 1955",
+        "hook": "A coolly painted target is crowned with cropped human faces—objective symbol meets human hint.",
+        "analysis": "Johns’s iconic target series questions the boundary between sign and painting. Here he renders a traditional target in rings of orange, yellow, and blue using encaustic wax. Above it, four plaster faces peek out from a hinged lid. The juxtaposition of impersonal symbol and personal fragment invites reflection on identity and perception. The orange rings hum with energy, while the faces add psychological depth. In this way, Johns uses orange as both a formal element and a conceptual hinge between objectivity and subjectivity.",
+        "palette": ["#FFA500", "#FF4500", "#FF8C00", "#87CEEB", "#6495ED"]
+      }
+    ];
 
-<script>
-/* Bright palette (ring 1) */
-const BRIGHT=[
-  {name:"Pantone 021 C",hex:"#FE5000"},{name:"Pure Orange",hex:"#FFA500"},{name:"Solar Orange",hex:"#FF8E00"},
-  {name:"Nickelodeon",hex:"#FF6600"},{name:"Fanta Orange",hex:"#FF6A00"},{name:"Firefox",hex:"#FF9400"},
-  {name:"Tangerine",hex:"#F28500"},{name:"Tiger Orange",hex:"#FF7F24"},{name:"Carrot",hex:"#ED9121"},
-  {name:"Amber",hex:"#FFBF00"},{name:"Safety Orange",hex:"#FF5E00"},{name:"Signal Orange",hex:"#FF6A13"}
-];
-/* Ghosts (ring 3) */
-const GHOSTS=["#B36019","#F9751F","#F6B76F","#D2B379","#E3AC47","#F88E10","#C18514","#DE9513","#92752D","#F0CE85","#FCBA45","#D99621","#E8C569","#F0B85F","#D2B265"];
-const EMOJIS=["&#128992;","&#129031;","&#128246;","&#128248;","&#129505;","&#127818;","&#129389;","&#129365;","&#127840;","&#127875;","&#127936;","&#128217;"];
+    // Array of images corresponding to the paintings in order. It is assumed that
+    // images are named 1.jpg, 2.jpg, etc. and stored in the 'paintings' directory.
+    const paintings = Array.from({ length: descriptions.length }, (_, i) => `paintings/${i + 1}.jpg`);
 
-const gdeg=()=>3;
-function conic(cols,g,gapColor){const seg=360/cols.length,parts=[];for(let i=0;i<cols.length;i++){const s=i*seg,ce=s+(seg-g),ge=s+seg;parts.push(`${cols[i]} ${s}deg ${ce}deg`,`${gapColor} ${ce}deg ${ge}deg`)}return `conic-gradient(${parts.join(',')})`}
-function sectorPath(cx,cy,r0,r1,a0,a1){const c=a=>({x:cx+Math.cos(a)*r1,y:cy+Math.sin(a)*r1});const d=a=>({x:cx+Math.cos(a)*r0,y:cy+Math.sin(a)*r0});const p0=c(a0),p1=c(a1),q1=d(a1),q0=d(a0),large=((a1-a0)>Math.PI)?1:0;return `M${q0.x},${q0.y} L${p0.x},${p0.y} A${r1},${r1} 0 ${large} 1 ${p1.x},${p1.y} L${q1.x},${q1.y} A${r0},${r0} 0 ${large} 0 ${q0.x},${q0.y} Z`;}
+    // Build carousel slides
+    const carousel = document.getElementById('carousel');
+    const caption = document.getElementById('caption');
+    descriptions.forEach((desc, idx) => {
+      const slide = document.createElement('div');
+      slide.className = 'slide';
+      const img = document.createElement('img');
+      img.src = paintings[idx];
+      img.alt = desc.title;
+      slide.appendChild(img);
+      // When a slide is clicked or double tapped, open modal
+      slide.addEventListener('click', () => openModal(idx));
+      carousel.appendChild(slide);
+    });
 
-function buildHitSectors(svgEl, outerD, thick, items, onTap, innerRpx=null){
-  const N=items.length; svgEl.setAttribute('viewBox','0 0 1000 1000'); svgEl.innerHTML=''; const cx=500,cy=500,outR=480;
-  const inR=innerRpx?(outR-(outerD/2-innerRpx)*(outR/(outerD/2))):(outR-(thick*(outR/(outerD/2))));
-  for(let i=0;i<N;i++){const a0=(i/N)*2*Math.PI,a1=((i+1)/N)*2*Math.PI;const p=sectorPath(cx,cy,inR,outR,a0,a1);
-    const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',p);path.setAttribute('fill','transparent');path.classList.add('hit');
-    const item=items[i]; path.addEventListener('pointerdown',()=>onTap(item)); path.addEventListener('touchstart',()=>onTap(item),{passive:true}); svgEl.appendChild(path);}
-}
-function buildEmojiRing(container,list,R,phase){container.innerHTML='';const n=list.length;
-  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='emoji';d.innerHTML=`<span>${list[i]}</span>`;
-    const a=i*(2*Math.PI/n)+phase,x=Math.cos(a)*R,y=Math.sin(a)*R; d.style.transform=`translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-    d.addEventListener('pointerdown',()=>routeWithFade('color-library.html#hex=FFA500')); d.addEventListener('touchstart',()=>routeWithFade('color-library.html#hex=FFA500'),{passive:true});
-    container.appendChild(d);} }
-function buildMidNodes(){const mid=document.getElementById('midRing');mid.innerHTML='';const exts=['.jpg','.jpeg','.png','.JPG','.JPEG','.PNG'];const stamp='?v='+Date.now();
-  for(let i=1;i<=6;i++){const n=document.createElement('div');n.className='mnode withCloud';const img=new Image();img.alt='Painting';n.appendChild(img);mid.appendChild(n);
-    let k=0;(function next(){if(k>=exts.length){n.classList.add('noimg');return;}img.onerror=next;img.decoding='async';img.loading='eager';img.src=`assets/paintings/${i}${exts[k++]}${stamp}`;})();
-    n.addEventListener('pointerdown',()=>routeWithFade(`art-gallery.html#painting=${i}`)); n.addEventListener('touchstart',()=>routeWithFade(`art-gallery.html#painting=${i}`),{passive:true});}}
+    // Set initial caption
+    setCaption(0);
+    // Update caption on scroll
+    carousel.addEventListener('scroll', () => {
+      // Determine the index of the slide closest to the center
+      const slides = carousel.getElementsByClassName('slide');
+      let center = carousel.scrollLeft + carousel.offsetWidth / 2;
+      let minDiff = Infinity;
+      let closest = 0;
+      for (let i = 0; i < slides.length; i++) {
+        const slide = slides[i];
+        const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+        const diff = Math.abs(center - slideCenter);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = i;
+        }
+      }
+      setCaption(closest);
+    });
 
-function layoutScene(){
-  const root=document.documentElement, canvas=document.getElementById('canvas');
-  const innerWrap=document.getElementById('innerWrap'), innerSurface=document.getElementById('innerSurface'), innerHalo=document.getElementById('innerHalo');
-  const outerWrap=document.getElementById('outerWrap'), outerSurface=document.getElementById('outerSurface'), outerHalo=document.getElementById('outerHalo');
-  const innerHits=document.getElementById('innerHits'), outerHits=document.getElementById('outerHits');
-  const midWrap=document.getElementById('midWrap'), midRing=document.getElementById('midRing');
-  const emojiWrapA=document.getElementById('emojiWrapA'), emojiWrapB=document.getElementById('emojiWrapB');
-  const W=innerWidth,H=innerHeight,S=Math.min(W,H); canvas.style.width=W+'px'; canvas.style.height=H+'px'; root.style.setProperty('--emoji-font',Math.round(W*0.036)+'px');
-  const innerD=Math.round(S*0.58), innerThick=Math.max(16,Math.round(innerD*0.12)); innerWrap.style.width=innerWrap.style.height=innerD+'px'; root.style.setProperty('--inner-thick',innerThick+'px'); innerHalo.style.width=innerHalo.style.height=(innerD+24)+'px';
-  innerSurface.style.background=conic(BRIGHT.map(o=>o.hex), gdeg(), 'transparent'); buildHitSectors(innerHits, innerD, innerThick, BRIGHT, c=>routeWithFade(`color-library.html#hex=${c.hex.replace('#','')}`));
-  midWrap.style.width=midWrap.style.height=innerD+'px'; const nodeScale=0.82,nodeD=Math.round(innerThick*0.85*5.25*nodeScale); const margin=2,midR=Math.max(0,(W/2)-(nodeD/2)-margin);
-  const nodes=midRing.querySelectorAll('.mnode'); const N=6,step=2*Math.PI/N; nodes.forEach((n,i)=>{const a=i*step,x=Math.cos(a)*midR,y=Math.sin(a)*midR;n.style.width=n.style.height=nodeD+'px';n.style.transform=`translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;});
-  const outerInnerR=midR+nodeD/2+margin, outerThick=innerThick*2.2, outerOuterR=Math.max(outerInnerR+outerThick,W/2+8), outD=Math.round(outerOuterR*2);
-  outerWrap.style.width=outerWrap.style.height=outD+'px'; outerHalo.style.width=outerHalo.style.height=(outD+28)+'px';
-  outerSurface.style.webkitMask=`radial-gradient(circle, transparent ${outerInnerR}px, #000 ${outerInnerR}px, #000 ${outerOuterR}px, transparent ${outerOuterR}px)`;
-  outerSurface.style.mask=`radial-gradient(circle, transparent ${outerInnerR}px, #000 ${outerInnerR}px, #000 ${outerOuterR}px, transparent ${outerOuterR}px)`;
-  outerSurface.style.background=conic(GHOSTS, gdeg(), 'transparent');
-  buildHitSectors(outerHits, outD, outD/2-outerInnerR, GHOSTS.map(h=>({hex:h})), ghost=>routeWithFade(`illusion.html#hex=${ghost.hex.replace('#','')}`), outerInnerR);
-  const gap=Math.max(8,Math.round(S*0.014)), rA=outerOuterR+gap, rB=rA+Math.max(22,Math.round(S*0.028)); emojiWrapA.style.width=emojiWrapA.style.height=(rA*2)+'px'; emojiWrapB.style.width=emojiWrapB.style.height=(rB*2)+'px';
-  buildEmojiRing(document.getElementById('emojiRingA'), EMOJIS, rA, 0); buildEmojiRing(document.getElementById('emojiRingB'), EMOJIS, rB, Math.PI*2/(EMOJIS.length*2));
-  window.__geom={W,H,S, innerD, innerThick, midR, nodeD, outerInnerR, outerOuterR, rA, rB};
-}
+    function setCaption(index) {
+      const d = descriptions[index];
+      caption.innerHTML = `<strong>${d.title}</strong><br><span>${d.hook}</span>`;
+    }
 
-(function cometSpawner(){
-  const field=document.getElementById('cometField');
-  function spawnOnce(){
-    const g=window.__geom; if(!g){ setTimeout(spawnOnce,800); return; }
-    const kinds=['straight','offcenter','curved']; const kind=kinds[Math.floor(Math.random()*kinds.length)];
-    const theta=Math.random()*Math.PI*2, n={x:-Math.sin(theta),y:Math.cos(theta)};
-    const run=Math.max(g.W,g.H)+400, dur=4.8+Math.random()*3.0; let P0,P1,C; const center={x:0,y:0};
-    if(kind==='straight'){ P0={x:center.x-Math.cos(theta)*run/2,y:center.y-Math.sin(theta)*run/2}; P1={x:center.x+Math.cos(theta)*run/2,y:center.y+Math.sin(theta)*run/2}; }
-    else if(kind==='offcenter'){ const d=(Math.random()*0.35+0.15)*((g.rA+g.rB)/2);
-      const sh={x:n.x*(Math.random()<0.5?-d:d),y:n.y*(Math.random()<0.5?-d:d)};
-      P0={x:center.x-Math.cos(theta)*run/2+sh.x,y:center.y-Math.sin(theta)*run/2+sh.y};
-      P1={x:center.x+Math.cos(theta)*run/2+sh.x,y:center.y+Math.sin(theta)*run/2+sh.y};
-    }else{ P0={x:center.x-Math.cos(theta)*run/2,y:center.y-Math.sin(theta)*run/2}; P1={x:center.x+Math.cos(theta)*run/2,y:center.y-Math.sin(theta)*run/2};
-      const bend=(Math.random()*0.5+0.3)*((g.rA+g.rB)/2); C={x:center.x+n.x*(Math.random()<0.5?-bend:bend), y:center.y+n.y*(Math.random()<0.5?-bend:bend)}; }
-    const comet=document.createElement('div'); comet.className='comet';
-    const stk=document.createElement('div'); stk.className='cometStack';
-    const top=document.createElement('div'); top.className='top'; top.innerHTML='&#128992;'; const tail=document.createElement('div'); tail.innerHTML='&#x2604;&#xFE0F;';
-    stk.appendChild(top); stk.appendChild(tail); comet.appendChild(stk); field.appendChild(comet);
-    let t0=null; function lerp(a,b,t){return a+(b-a)*t}
-    function draw(now){ if(!t0)t0=now; const u=Math.min(1,(now-t0)/(dur*1000)); let x,y;
-      if(kind==='curved' && C){ const one=1-u; x=one*one*P0.x+2*one*u*C.x+u*u*P1.x; y=one*one*P0.y+2*one*u*C.y+u*u*P1.y; }
-      else { x=lerp(P0.x,P1.x,u); y=lerp(P0.y,P1.y,u); }
-      comet.style.transform=`translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`; if(u<1) requestAnimationFrame(draw); else comet.remove(); }
-    requestAnimationFrame(draw);
-  }
-  function loop(){ spawnOnce(); setTimeout(loop,7000+Math.random()*5000); }
-  setTimeout(loop,1200);
-})();
-
-function routeWithFade(url){
-  const o=document.getElementById('outro'), q=document.getElementById('quote');
-  o.classList.remove('fade'); o.style.opacity=0; o.style.pointerEvents='none'; q.style.transition='none'; q.style.opacity=0;
-  requestAnimationFrame(()=>{ o.classList.add('fade'); o.style.opacity=1; o.style.pointerEvents='auto';
-    setTimeout(()=>{ q.style.transition='opacity 1.2s ease'; q.style.opacity=1; }, 400);
-    setTimeout(()=>{ q.style.transition='opacity 1.75s ease'; q.style.opacity=0; }, 1600);
-    setTimeout(()=>{ location.href=url; }, 3700); });
-}
-
-function boot(){
-  const v=document.getElementById('bgVideo'); v.src='assets/placeholder.mp4'; const p=v.play(); if(p&&p.catch) p.catch(()=>{});
-  buildMidNodes(); layoutScene();
-  document.getElementById('question').addEventListener('click', ()=> routeWithFade('color-library.html#hex=FFA64D'));
-  addEventListener('resize', layoutScene, {passive:true});
-}
-boot();
-</script>
+    // Modal functions
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
+    const modalText = document.getElementById('modalText');
+    const swatchRow = document.getElementById('swatchRow');
+    const closeBtn = document.querySelector('#modal .close');
+    closeBtn.addEventListener('click', closeModal);
+    function openModal(index) {
+      const d = descriptions[index];
+      modalImg.src = paintings[index];
+      modalImg.alt = d.title;
+      modalText.innerHTML = `<strong>${d.title}</strong><br><small>${d.analysis}</small>`;
+      // Clear previous swatches
+      swatchRow.innerHTML = '';
+      d.palette.forEach(color => {
+        const sw = document.createElement('div');
+        sw.className = 'swatch';
+        sw.style.backgroundColor = color;
+        swatchRow.appendChild(sw);
+      });
+      modal.style.display = 'flex';
+    }
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+    // Also close modal if clicked outside image/text
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  </script>
 </body>
 </html>
