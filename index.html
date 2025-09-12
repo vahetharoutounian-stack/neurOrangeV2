@@ -1,393 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>neurOrange • Deep Research Gallery (stable carousel + external text)</title>
+1. The Fighting Temeraire (1839) – J.M.W. Turner
+Hook: An old warship glides toward its twilight under a furnace sky—beauty and elegy in one sunset.
+Analysis: Turner paints farewell and modernity together: a pale hero-ship towed by a sooty tug beneath “deeply crimsoned” clouds. The oranges are not incidental—they are the emotional core, a chosen exaggeration to make time visible. Orange is dusk, memory, and radiance at once; the ship becomes a spectral monument against a world turning to steam.
+Dominant Orange Palette:
+#FFD6A5
+#FF9900
+#FF4500
+#B87333
+#8B4513
 
-<!-- ============ STYLES ============ -->
-<style>
-  :root{
-    --glass: rgba(0,0,0,.28);
-    --gap: clamp(24px,7vw,72px);
-    --basis: 21%;
-    --scaleCenter: 1.6;
-    --scaleSide: .80;
-    --rowH: 22vh;
-  }
-  html,body{
-    margin:0;background:#000;color:#fff;
-    -webkit-font-smoothing:antialiased;
-    font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-  }
-  #stage{position:fixed;inset:0;display:grid;place-items:center;
-    padding:env(safe-area-inset-top) env(safe-area-inset-right)
-            env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  #frame{
-    position:relative;height:100dvh;width:min(100dvw,calc(100dvh*9/16));
-    border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
-    background:#000;box-shadow:0 20px 80px rgba(0,0,0,.55)
-  }
-  /* Optional background (drop gallery.jpg next to this file) */
-  #frame::before{content:"";position:absolute;inset:0;z-index:0;
-    background:url("gallery.jpg") center/auto 100% no-repeat;
-    filter:saturate(105%) brightness(95%)}
+2. Impression, Sunrise (1872) – Claude Monet
+Hook: From a harbor wrapped in morning haze, a small orange sun ignites sky and water with a single pulse of color.
+Analysis: At Le Havre Monet reduces the world to air and temperature. The tiny sun and its reflection are the axis; by placing a warm high-chroma note among cool greys, he measures the hour more honestly than detail could. The dot reads as ignition—a modern day rising, industrial stacks in the mist.
+Dominant Orange Palette:
+#FF6A00
+#FF7F32
+#FF9E57
+#FFB347
+#C85A2E
 
-  #content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:0 0 10px}
+3. Orange and Yellow (1956) – Mark Rothko
+Hook: Two weightless fields—yellow above, orange below—breathe until the air itself seems coloured.
+Analysis: No objects—only atmosphere. The orange panel is presence and temperature; yellow is light. Where they touch, a seam of vibration forms. Feeling arrives without a story: steadiness from the orange, lift from the yellow, stillness charged with life.
+Dominant Orange Palette:
+#FFA826
+#FFD24A
+#FFE38A
+#FF8A33
+#FFF3C1
 
-  /* ===== Carousel ===== */
-  .carousel{
-    position:relative;height:var(--rowH);background:var(--glass);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-    border-radius:12px;border:1px solid rgba(255,255,255,.08);overflow:hidden
-  }
-  #track{
-    position:relative;height:100%;display:flex;align-items:center;gap:var(--gap);
-    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
-    scroll-snap-type:x mandatory;scroll-snap-stop:always;
-    scroll-padding-left:50%; scroll-padding-right:50%;   /* ensures first/last can center */
-    padding:0 var(--gap);scrollbar-width:none;touch-action:pan-x;cursor:grab
-  }
-  #track::-webkit-scrollbar{display:none}
-  .spacer{flex:0 0 0px;height:1px} /* spacers not required with scroll-padding but harmless */
+4. South Wind, Clear Sky (Red Fuji) (c. 1830) – Katsushika Hokusai
+Hook: After a cloudless night and south wind, Fuji’s flank flares vermilion.
+Analysis: One chromatic event tells weather, hour, and presence: warm banding across the slope against a cool, lifting sky. Constancy quickened by time; orange as revelation rather than ornament.
+Dominant Orange Palette:
+#C94F2D
+#D9642A
+#E87334
+#F08A3C
+#F4A460
 
-  .card{
-    flex:0 0 var(--basis);height:calc(100%/var(--scaleCenter));scroll-snap-align:center;
-    display:flex;align-items:center;justify-content:center;
-    transform:scale(var(--scaleSide));transition:transform .18s ease,z-index .18s ease,filter .18s ease;
-    position:relative;border-radius:12px
-  }
-  .card img{
-    max-height:100%;width:auto;height:auto;object-fit:contain;display:block;
-    -webkit-user-drag:none;user-select:none;background:#0b0b0c;border-radius:12px;
-    filter:drop-shadow(0 0 28px rgba(0,0,0,.95)) drop-shadow(0 0 52px rgba(0,0,0,.75))
-  }
-  .card.ph{ /* placeholder when image is missing */
-    background:linear-gradient(135deg,#1d1d1d,#2b2b2b);
-    border:1px dashed rgba(255,255,255,.18);color:#ccc;text-align:center;padding:10px
-  }
+5. Red Canna (1924) – Georgia O’Keeffe
+Hook: Petals swell into landscape—scarlet and tangerine fold until the bloom reads as heat and breath.
+Analysis: Enlarged and cropped, the flower becomes terrain. Orange is vitality: concentrated at the core, released along lit edges. The colour refuses to be background; it is the subject, turning a blossom into an experience of radiance.
+Dominant Orange Palette:
+#B22222
+#FF4500
+#FF8C00
+#FFA07A
+#FFD1A1
 
-  /* ===== Caption ===== */
-  #desc{
-    width:70%;margin:8px auto 0;min-height:4.6vh;max-height:10vh;padding:6px 10px;font-size:13.25px;
-    line-height:1.35;color:#f2f2f2;background:var(--glass);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-    border-radius:12px;border:1px solid rgba(255,255,255,.08)
-  }
-  #desc .head{font-weight:700;margin-bottom:2px}
-  #desc .body{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;text-align:justify}
+6. Composition VIII (1923) – Wassily Kandinsky
+Hook: Circles and vectors stage a geometric conversation; orange is the warm bass note that keeps the score humane.
+Analysis: The space is relational, not perspectival. Orange anchors intersections and dilates light at edges; against cool blues and sharp blacks it prevents brittleness—structure with a pulse.
+Dominant Orange Palette:
+#E67E22
+#FFA500
+#FFB347
+#F4A460
+#D2691E
 
-  /* ===== Modal ===== */
-  #modal{position:fixed;inset:0;display:none;overflow:hidden;background:rgba(0,0,0,.88);color:#fff;z-index:9990}
-  #modal.show{display:block}
-  #mWrap{
-    position:absolute;inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px
-  }
-  #mImg{max-width:94vw;max-height:60vh;border:2px solid #fff;border-radius:12px;margin-bottom:8px}
-  #mMeta{max-width:94vw}
-  #mTitle{font-weight:800;margin:6px 0 4px;font-size:18px;line-height:1.25}
-  #mLong{max-height:32vh;overflow:auto;-webkit-overflow-scrolling:touch;font-size:15px;line-height:1.55;text-align:justify}
+7. Synchromy in Orange: To Form (1914) – Stanton MacDonald-Wright
+Hook: Bands and arcs hinge around an orange key, as if a chord were struck and space answered.
+Analysis: Synchromism treats colour like music. Orange provides the tonic while complementary cools make it flare and recede rhythmically. The eye traverses temperature and value—movement felt in the body.
+Dominant Orange Palette:
+#FFA500
+#FF8C00
+#FFB347
+#E67E22
+#F4A460
 
-  /* Swatches styled like neurOrange Color Library (white rim + crosshair) */
-  #swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  #swatches .sw{position:relative;width:44px;height:44px;border-radius:12px;border:2px solid #fff;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.25) inset}
-  #swatches .sw i{position:absolute;inset:0;border-radius:inherit;border:0}
-  #swatches .sw::before,#swatches .sw::after{content:"";position:absolute;background:#222;opacity:.85}
-  #swatches .sw::before{width:1px;height:60%;left:50%;top:20%;transform:translateX(-.5px)}
-  #swatches .sw::after{height:1px;width:60%;top:50%;left:20%;transform:translateY(-.5px)}
+8. Target with Four Faces (1955) – Jasper Johns
+Hook: A cool, impersonal target—concentric bands including a humming orange—beneath a box of cropped faces.
+Analysis: Encaustic traps newsprint and brushwork beneath a literal surface. Orange is attention and temperature inside an otherwise impartial schema. Between hot chroma and blind portrait, Johns stages the tension of public sign vs. private body.
+Dominant Orange Palette:
+#FFA500
+#FF8C00
+#FF7F50
+#F4A460
+#E07A5F
 
-  /* ===== Footer buttons (linked to other pages) ===== */
-  #footerNav{
-    position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 8px);
-    display:flex;gap:10px;justify-content:center;z-index:100; pointer-events:auto
-  }
-  #footerNav a{
-    text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
-    color:#fff;padding:10px 14px;border-radius:999px;font-weight:700;font-size:14px;
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)
-  }
-  #footerNav a:hover{background:rgba(255,255,255,.18)}
-</style>
-</head>
-<body>
-<div id="stage"><div id="frame"><div id="content">
-  <div class="carousel"><div id="track"></div></div>
-  <div id="desc" aria-live="polite"></div>
-</div></div></div>
+9. Beginning (1958) – Kenneth Noland
+Hook: Concentric rings focus on a vermilion-orange core—colour as genesis.
+Analysis: Stain painting makes colour atmosphere. A hot nucleus set against complement and raw canvas reads like first light. Orange functions as first cause, a centring dawn note.
+Dominant Orange Palette:
+#E34A33
+#FFA500
+#F5D0A9
+#F4A460
+#000000
 
-<!-- sticky footer buttons -->
-<nav id="footerNav" aria-label="site navigation">
-  <!-- CHANGE hrefs to your actual files -->
-  <a href="index.html">Home</a>
-  <a href="neurOrange.html">Color Library</a>
-  <a href="about.html">About</a>
-</nav>
+10. The Night Café (1888) – Vincent van Gogh
+Hook: Orange and green collide in a feverish nocturne; gaslight glows like a low-grade fever.
+Analysis: Van Gogh paints moral temperature via complements—vermilion walls against poisonous green. Orange here is not comfort but warning; pressed against green it becomes nauseating, the glow of a night that won’t end.
+Dominant Orange Palette:
+#FF6347
+#FF4500
+#CD5C5C
+#FF8C00
+#C04000
 
-<!-- fullscreen modal -->
-<div id="modal" role="dialog" aria-modal="true">
-  <div id="mWrap">
-    <img id="mImg" alt="">
-    <div id="mMeta">
-      <div id="mTitle"></div>
-      <div id="mLong"></div>
-      <div id="swatches"></div>
-    </div>
-  </div>
-</div>
+11. Bedroom in Arles (1889) – Vincent van Gogh
+Hook: A simple room tilts toward us; orange wood glows against cool walls until the space feels steadfast.
+Analysis: Lines are emphatic, shadows simplified. Orange carries presence and use; blue steadies. A portrait of rest carved from two complementary families.
+Dominant Orange Palette:
+#FF9E57
+#F4A460
+#E0702A
+#C68642
+#8B4513
 
-<!-- ============ APP SCRIPT (stable centre detection + external text) ============ -->
-<script>
-/* 12 paintings — Monet first (rename files or swap first two if needed) */
-const PAINTINGS = [
-  {src:'paintings/1.jpg',  title:'Impression, Sunrise',                 artist:'Claude Monet',              year:'1872'},
-  {src:'paintings/2.jpg',  title:'The Fighting Temeraire',               artist:'J. M. W. Turner',           year:'1839'},
-  {src:'paintings/3.jpg',  title:'Orange and Yellow',                    artist:'Mark Rothko',               year:'1956'},
-  {src:'paintings/4.jpg',  title:'South Wind, Clear Sky',                artist:'Katsushika Hokusai',        year:'c. 1830'},
-  {src:'paintings/5.jpg',  title:'Red Canna',                            artist:'Georgia O’Keeffe',          year:'1924'},
-  {src:'paintings/6.jpg',  title:'Composition VIII',                     artist:'Wassily Kandinsky',         year:'1923'},
-  {src:'paintings/7.jpg',  title:'Synchromy in Orange: To Form',         artist:'Stanton MacDonald-Wright',  year:'1914'},
-  {src:'paintings/8.jpg',  title:'Target with Four Faces',               artist:'Jasper Johns',              year:'1955'},
-  {src:'paintings/9.jpg',  title:'Beginning',                            artist:'Kenneth Noland',            year:'1958'},
-  {src:'paintings/10.jpg', title:'The Night Café',                       artist:'Vincent van Gogh',          year:'1888'},
-  {src:'paintings/11.jpg', title:'Bedroom in Arles',                     artist:'Vincent van Gogh',          year:'1889'},
-  {src:'paintings/12.jpg', title:'Flaming June',                         artist:'Frederic Leighton',         year:'1895'}
-];
-
-/* ---- text matching helpers ---- */
-const canon = s => s.toLowerCase()
-  .normalize('NFD').replace(/\p{Diacritic}/gu,'')
-  .replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
-
-const ALIAS = {
-  'red canna':'canna red and orange',
-  'the night cafe':'the night café',
-  'south wind, clear sky (red fuji)':'south wind, clear sky',
-  'red fuji':'south wind, clear sky'
-};
-
-/* ---- load descriptions: prefer Picture_desc.txt; fallback to embedded ---- */
-async function loadDescriptionText(){
-  try{
-    const r = await fetch('Picture_desc.txt', {cache:'no-store'});
-    if(r.ok) return await r.text();
-  }catch(e){}
-  const el = document.getElementById('desc-data');
-  return el ? el.textContent : '';
-}
-
-/* ---- parse text file into {title: {hook, analysis, palette}} ---- */
-function parseEntries(text){
-  const t = (text||'').replace(/\r/g,'');
-  const parts = t.split(/\n(?=\d+\.\s+)/);
-  const entries = {};
-  for(const chunk of parts){
-    const head = chunk.match(/^\s*(\d+)\.\s*(.+)\n/);
-    if(!head) continue;
-    const titleLine = head[2].trim();
-    const key = canon(
-      titleLine
-        .replace(/\s*[—–-].*$/, '')
-        .replace(/\s*\(c\.\s*\d+\)\s*$/i,'')
-        .replace(/\s*\(\d{4}\)\s*$/,'')
-    );
-    const hook = (chunk.match(/Hook:\s*([\s\S]*?)(?:\n\n|Analysis:|\nDominant Orange Palette:|$)/i)||[])[1]?.trim()||'';
-    const analysis = (chunk.match(/Analysis:\s*([\s\S]*?)(?:\n\nDominant Orange Palette:|\nDominant Orange Palette:|$)/i)||[])[1]?.trim()||hook;
-    const hexes = [...chunk.matchAll(/#[0-9a-f]{6}/gi)].map(m=>m[0].toUpperCase());
-    entries[key] = {hook, analysis, palette:[...new Set(hexes)]};
-  }
-  return entries;
-}
-
-/* ---- paragraphs renderer ---- */
-function asParagraphs(txt){
-  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const t = (txt||'').trim(); if(!t) return '';
-  return '<p>'+esc(t).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
-}
-
-/* ---- robust centre detection (no “locked on first” bug) ---- */
-function detectActiveIndex(){
-  const cards = [...track.querySelectorAll('.card')];
-  if(!cards.length) return 0;
-  const tr = track.getBoundingClientRect();
-  const cx = tr.left + tr.width/2;
-  let best = 0, bestD = Infinity;
-  cards.forEach((el,i)=>{
-    const r = el.getBoundingClientRect();
-    const mid = r.left + r.width/2;
-    const d = Math.abs(mid - cx);
-    if(d < bestD){ bestD = d; best = i; }
-  });
-  return best;
-}
-function applyScales(){
-  const cards=[...track.querySelectorAll('.card')];
-  const tr = track.getBoundingClientRect();
-  const cx = tr.left + tr.width/2;
-  cards.forEach((el)=>{
-    const r = el.getBoundingClientRect();
-    const mid = r.left + r.width/2;
-    const d = Math.abs(mid - cx);
-    const t = Math.min(1, d/(tr.width*.5));     /* 0 at center..1 at edges */
-    const s = (1 - t)*(Number(getCSS('--scaleCenter')) - Number(getCSS('--scaleSide'))) + Number(getCSS('--scaleSide'));
-    el.style.transform = `scale(${s.toFixed(3)})`;
-  });
-}
-function getCSS(name){ return getComputedStyle(document.documentElement).getPropertyValue(name); }
-
-/* ---- UI refs ---- */
-const track = document.getElementById('track');
-const descEl = document.getElementById('desc');
-const modal = document.getElementById('modal');
-const mWrap = document.getElementById('mWrap');
-const mImg = document.getElementById('mImg');
-const mTitle = document.getElementById('mTitle');
-const mLong = document.getElementById('mLong');
-const sw = document.getElementById('swatches');
-
-let activeIndex = 0;
-let ENTRIES = {}; // merged description map
-
-async function build(){
-  const txt = await loadDescriptionText();
-  ENTRIES = parseEntries(txt);
-
-  /* build cards; show placeholder if image missing */
-  PAINTINGS.forEach((p,i)=>{
-    const card=document.createElement('div');
-    card.className='card'; card.dataset.index=i;
-
-    const img=new Image(); img.decoding='async';
-    img.onload=()=>card.appendChild(img);
-    img.onerror=()=>{ card.classList.add('ph'); card.innerHTML=`<div>No image<br><small>${p.title}</small></div>`; };
-    img.src=p.src;
-
-    /* SINGLE TAP: center → expand */
-    card.addEventListener('click', ()=>{
-      const cards=[...track.querySelectorAll('.card')];
-      activeIndex = i;
-      cards[i]?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-      setTimeout(()=>openModal(), 220);
-      updateCaption();
-    }, {passive:true});
-
-    track.appendChild(card);
-  });
-
-  /* initial apply */
-  requestAnimationFrame(()=>{
-    activeIndex = detectActiveIndex();
-    applyScales();
-    updateCaption();
-  });
-}
-
-/* caption uses Hook (or blank “—” if none) */
-function entryFor(title){
-  const key = canon(title);
-  return ENTRIES[key] || ENTRIES[canon(ALIAS[key]||'')] || null;
-}
-function updateCaption(){
-  const p=PAINTINGS[activeIndex] || PAINTINGS[0];
-  const d=entryFor(p.title);
-  const short = d?.hook || '—';
-  descEl.innerHTML = `<div class="head">${p.title} — ${p.artist} ${p.year?`(${p.year})`:''}</div>
-                      <div class="body">${short}</div>`;
-}
-
-/* modal fill; uses Analysis with paragraph rendering */
-function openModal(){
-  const p=PAINTINGS[activeIndex] || PAINTINGS[0];
-  const d=entryFor(p.title);
-  const card=track.querySelectorAll('.card')[activeIndex];
-  const img=card?.querySelector('img');
-
-  mImg.src = img?.src || '';
-  mImg.alt = `${p.title} — full view`;
-  mTitle.textContent = `${p.title} — ${p.artist}${p.year?', '+p.year:''}`;
-
-  const body = d ? (d.analysis || d.hook || '') : '';
-  mLong.innerHTML = asParagraphs(body);
-
-  sw.innerHTML='';
-  (d?.palette||[]).forEach(hex=>{
-    const chip=document.createElement('span'); chip.className='sw';
-    const fill=document.createElement('i'); fill.style.background=hex; chip.appendChild(fill);
-    sw.appendChild(chip);
-  });
-
-  modal.classList.add('show');
-}
-
-/* close modal, swipe nav */
-modal.addEventListener('click',()=>modal.classList.remove('show'),{passive:true});
-let sx=0,sy=0,dx=0,dy=0;
-mWrap.addEventListener('touchstart',e=>{const t=e.touches[0]; sx=t.clientX; sy=t.clientY;},{passive:true});
-mWrap.addEventListener('touchmove',e=>{const t=e.touches[0]; dx=t.clientX-sx; dy=t.clientY-sy;},{passive:true});
-mWrap.addEventListener('touchend',()=>{
-  if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)){
-    activeIndex = (activeIndex + (dx<0?1:-1) + PAINTINGS.length) % PAINTINGS.length;
-    openModal();
-  }
-  dx=dy=0;
-},{passive:true});
-
-/* scroll: smoothly update scaling and active card; also snap to nearest after the user stops */
-let rafLock=false, snapTimer=null;
-track.addEventListener('scroll',()=>{
-  if(!rafLock){
-    rafLock=true; requestAnimationFrame(()=>{
-      applyScales();
-      activeIndex = detectActiveIndex();
-      updateCaption();
-      rafLock=false;
-    });
-  }
-  clearTimeout(snapTimer);
-  snapTimer = setTimeout(()=>snapToNearest(), 110);
-},{passive:true});
-function snapToNearest(){
-  const cards=[...track.querySelectorAll('.card')]; if(!cards.length) return;
-  const tr=track.getBoundingClientRect(); const cx = tr.left + tr.width/2;
-  let best=0, bestD=Infinity;
-  cards.forEach((el,i)=>{
-    const r=el.getBoundingClientRect(); const mid = r.left + r.width/2;
-    const d = Math.abs(mid - cx); if(d<bestD){bestD=d; best=i;}
-  });
-  cards[best].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-}
-
-document.addEventListener('DOMContentLoaded', build);
-
-/* ===== HOW TO GET TEXT TO WORK =====
-   1) Place Picture_desc.txt at the SAME LEVEL as this HTML (repo root on GitHub Pages).
-   2) Each entry must follow:
-
-      <n>. Title (Year) – Artist
-
-      Hook: One or two sentences…
-
-      Analysis: Multi-paragraph “deep research” text (blank line between paragraphs)
-
-      Dominant Orange Palette:
-      #HEX1
-      #HEX2
-      #HEX3
-      #HEX4
-      #HEX5
-
-   3) Titles may contain “—” / “–” / “-” and (c. ####) or (####); the parser normalizes these.
-   4) For local file:// testing, paste the same text into the fallback block below.
-*/
-</script>
-
-<!-- ===== Optional embedded fallback for local file:// testing =====
-     If Picture_desc.txt is present on GitHub Pages, it will be used instead. -->
-<script id="desc-data" type="text/plain">
-<!-- Paste your numbered entries here for offline use (same format as Picture_desc.txt) -->
-</script>
-</body>
-</html>
+12. Flaming June (1895) – Frederic Leighton
+Hook: A young woman sleeps wrapped in translucent orange silk, glowing like embers against marble and sea.
+Analysis: Academic craft meets a chromatic dare: orange must carry the scene. Glazes stack until the drapery appears lit from within—beauty, warmth, and danger intertwined.
+Dominant Orange Palette:
+#FF7F50
+#FFA500
+#E97451
+#FFDAB9
+#CD5C5C
