@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>neurOrange • Deep Research Gallery</title>
+<title>neurOrange • Deep Research Gallery (fixed text + layering)</title>
 
 <style>
   :root{
@@ -29,12 +29,12 @@
     border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
     background:#000;box-shadow:0 20px 80px rgba(0,0,0,.55)
   }
-  /* Optional background (drop gallery.jpg at repo root) */
+  /* Optional background (drop gallery.jpg in repo root) */
   #frame::before{content:"";position:absolute;inset:0;z-index:0;
     background:url("gallery.jpg") center/auto 100% no-repeat;
     filter:saturate(105%) brightness(95%)}
 
-  #content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:0 0 74px} /* leave room for footer buttons */
+  #content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:0 0 74px}
 
   /* ===== Carousel ===== */
   .carousel{
@@ -43,19 +43,22 @@
     border-radius:12px;border:1px solid rgba(255,255,255,.08);overflow:hidden
   }
   #track{
+    isolation:isolate;             /* own stacking context to keep z-index sane */
     position:relative;height:100%;display:flex;align-items:center;gap:var(--gap);
     overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;
     scroll-snap-type:x mandatory;scroll-snap-stop:always;
-    scroll-padding-left:50%; scroll-padding-right:50%;
+    scroll-padding-left:50%; scroll-padding-right:50%; /* centre first/last cleanly */
     padding:0 var(--gap);scrollbar-width:none;touch-action:pan-x;cursor:grab
   }
   #track::-webkit-scrollbar{display:none}
+
   .card{
     flex:0 0 var(--basis);height:calc(100%/var(--scaleCenter));scroll-snap-align:center;
     display:flex;align-items:center;justify-content:center;
-    transform:scale(var(--scaleSide));transition:transform .18s ease,z-index .18s ease,filter .18s ease;
-    position:relative;border-radius:12px
+    transform:scale(var(--scaleSide));transition:transform .18s ease, z-index .18s ease, filter .18s ease;
+    position:relative;border-radius:12px; will-change: transform
   }
+  .card.center{ z-index: 9999 !important; } /* ensure centre is always on top */
   .card img{
     max-height:100%;width:auto;height:auto;object-fit:contain;display:block;
     -webkit-user-drag:none;user-select:none;background:#0b0b0c;border-radius:12px;
@@ -94,7 +97,7 @@
   #swatches .sw::before{width:1px;height:60%;left:50%;top:20%;transform:translateX(-.5px)}
   #swatches .sw::after{height:1px;width:60%;top:50%;left:20%;transform:translateY(-.5px)}
 
-  /* ===== Footer buttons (like your screenshot) ===== */
+  /* ===== Footer buttons like your screenshot ===== */
   #footerNav{
     position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 10px);
     display:flex;gap:12px;justify-content:center;z-index:100;pointer-events:auto
@@ -151,7 +154,7 @@ const PAINTINGS = [
   {src:'paintings/12.jpg', title:'Flaming June',                         artist:'Frederic Leighton',         year:'1895'}
 ];
 
-/* ---------- text loader (fetch Picture_desc.txt; fallback to embedded) ---------- */
+/* ---------- text loader (fetch Picture_desc.txt; else embedded fallback) ---------- */
 const canon = s => s.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
 const ALIAS = {'red canna':'canna red and orange','the night cafe':'the night café','south wind, clear sky (red fuji)':'south wind, clear sky','red fuji':'south wind, clear sky'};
 
@@ -187,11 +190,13 @@ function detectActiveIndex(){
 function applyScales(){
   const cards=[...track.querySelectorAll('.card')]; if(!cards.length) return;
   const tr=track.getBoundingClientRect(), cx=tr.left+tr.width/2;
-  cards.forEach((el)=>{
+  cards.forEach((el,i)=>{
     const r=el.getBoundingClientRect(); const mid=r.left+r.width/2; const d=Math.abs(mid-cx);
     const t=Math.min(1,d/(tr.width*.5));
     const s=(1-t)*(parseFloat(getCSS('--scaleCenter'))-parseFloat(getCSS('--scaleSide')))+parseFloat(getCSS('--scaleSide'));
     el.style.transform=`scale(${s.toFixed(3)})`;
+    el.style.zIndex = (1000 - Math.round(d)).toString();
+    el.classList.toggle('center', i === activeIndex);
   });
 }
 function getCSS(n){ return getComputedStyle(document.documentElement).getPropertyValue(n); }
@@ -229,6 +234,7 @@ async function build(){
     track.appendChild(card);
   });
 
+  /* initial */
   requestAnimationFrame(()=>{
     activeIndex=detectActiveIndex();
     applyScales();
@@ -268,13 +274,13 @@ function openModal(){
 }
 modal.addEventListener('click',()=>modal.classList.remove('show'),{passive:true});
 
-/* scroll behaviour: rescale + update active + snap */
+/* scroll: rescale + update active + gentle snap */
 let rafLock=false, snapTimer=null;
 track.addEventListener('scroll',()=>{
   if(!rafLock){
     rafLock=true; requestAnimationFrame(()=>{
-      applyScales();
       activeIndex=detectActiveIndex();
+      applyScales();
       updateCaption();
       rafLock=false;
     });
@@ -291,6 +297,7 @@ function snapToNearest(){
   cards[best].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
 }
 
+/* boot */
 document.addEventListener('DOMContentLoaded', build);
 </script>
 
