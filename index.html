@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>neurOrange • Gallery</title>
+<title>neurOrange • Deep Research Gallery</title>
+
+<!-- ===== STYLES ===== -->
 <style>
   :root{
     --glass: rgba(0,0,0,.28);
@@ -15,21 +17,30 @@
     --scaleSide: .80;
     --rowH: 22vh;
   }
-  html,body{margin:0;background:#000;color:#fff;-webkit-font-smoothing:antialiased;
-    font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+
+  html,body{
+    margin:0;background:#000;color:#fff;
+    -webkit-font-smoothing:antialiased;
+    font-family:ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  }
+
   #stage{position:fixed;inset:0;display:grid;place-items:center;
     padding:env(safe-area-inset-top) env(safe-area-inset-right)
             env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  #frame{position:relative;height:100dvh;width:min(100dvw,calc(100dvh*9/16));
+
+  #frame{
+    position:relative;height:100dvh;width:min(100dvw,calc(100dvh*9/16));
     border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);
-    background:#000;box-shadow:0 20px 80px rgba(0,0,0,.55)}
-  /* optional background (add gallery.jpg next to this file) */
+    background:#000;box-shadow:0 20px 80px rgba(0,0,0,.55)
+  }
+  /* Optional background: add gallery.jpg next to this file */
   #frame::before{content:"";position:absolute;inset:0;z-index:0;
     background:url("gallery.jpg") center/auto 100% no-repeat;
     filter:saturate(105%) brightness(95%)}
+
   #content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:0 0 10px}
 
-  /* carousel */
+  /* Carousel */
   .carousel{position:relative;height:var(--rowH);background:var(--glass);
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
     border-radius:12px;border:1px solid rgba(255,255,255,.08);overflow:hidden}
@@ -42,16 +53,16 @@
     display:flex;align-items:center;justify-content:center;transform:scale(var(--scaleSide));
     transition:transform .18s ease,z-index .18s ease,filter .18s ease;position:relative;border-radius:12px}
   .card img{max-height:100%;width:auto;height:auto;object-fit:contain;display:block;-webkit-user-drag:none;user-select:none;background:#0b0b0c;border-radius:12px;filter:drop-shadow(0 0 28px rgba(0,0,0,.95)) drop-shadow(0 0 52px rgba(0,0,0,.75))}
-  /* placeholder when an image is missing */
+  /* Placeholder if an image is missing */
   .card.ph{background:linear-gradient(135deg,#1d1d1d,#2b2b2b);border:1px dashed rgba(255,255,255,.18);color:#ccc;text-align:center;padding:10px}
 
-  /* caption under carousel */
+  /* Caption under carousel */
   #desc{width:70%;margin:8px auto 0;min-height:4.6vh;max-height:10vh;padding:6px 10px;font-size:13.25px;line-height:1.35;color:#f2f2f2;background:var(--glass);
     backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;border:1px solid rgba(255,255,255,.08)}
   #desc .head{font-weight:700;margin-bottom:2px}
   #desc .body{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;text-align:justify}
 
-  /* modal */
+  /* Fullscreen modal */
   #modal{position:fixed;inset:0;display:none;overflow:hidden;background:rgba(0,0,0,.88);color:#fff;z-index:9990}
   #modal.show{display:block}
   #mWrap{position:absolute;inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
@@ -60,7 +71,8 @@
   #mMeta{max-width:94vw}
   #mTitle{font-weight:800;margin:6px 0 4px;font-size:18px;line-height:1.25}
   #mLong{max-height:32vh;overflow:auto;-webkit-overflow-scrolling:touch;font-size:15px;line-height:1.55;text-align:justify}
-  /* swatches like Color Library */
+
+  /* Swatches styled like Color Library (white rim + crosshair) */
   #swatches{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
   #swatches .sw{position:relative;width:44px;height:44px;border-radius:12px;border:2px solid #fff;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.25) inset}
   #swatches .sw i{position:absolute;inset:0;border-radius:inherit;border:0}
@@ -87,6 +99,7 @@
   </div>
 </div>
 
+<!-- ===== APP SCRIPT ===== -->
 <script>
 /* 12 paintings — Monet first. If your files are Turner-first, swap the first two. */
 const PAINTINGS = [
@@ -104,6 +117,7 @@ const PAINTINGS = [
   {src:'paintings/12.jpg', title:'Flaming June',                         artist:'Frederic Leighton',         year:'1895'}
 ];
 
+/* -------- Title matching -------- */
 const canon = s => s.toLowerCase()
   .normalize('NFD').replace(/\p{Diacritic}/gu,'')
   .replace(/[^a-z0-9 ]+/g,' ')
@@ -117,12 +131,19 @@ const ALIAS = {
   'red fuji':'south wind, clear sky'
 };
 
-/* Fallback: we always use the embedded text block for reliability */
-async function loadTxt(){ return document.getElementById('desc-data').textContent; }
+/* -------- Load text: fetch Picture_desc.txt on web, fallback to embedded when file:// -------- */
+async function loadDescriptionText(){
+  try {
+    const r = await fetch('Picture_desc.txt', {cache:'no-store'});
+    if (r.ok) return await r.text();
+  } catch (e) {}
+  const el = document.getElementById('desc-data');
+  return el ? el.textContent : '';
+}
 
-/* Parser: robust to em/en/hyphen dashes and both (c. ####) and (####) year tails */
+/* -------- Parse entries -------- */
 function parseEntries(text){
-  const t = text.replace(/\r/g,'');
+  const t = (text||'').replace(/\r/g,'');
   const parts = t.split(/\n(?=\d+\.\s+)/);
   const entries = {};
   for(const chunk of parts){
@@ -131,53 +152,51 @@ function parseEntries(text){
     const titleLine = head[2].trim();
     const titleCanon = canon(
       titleLine
-        .replace(/\s*[—–-].*$/, '')            // strip any dash + trailing artist/year
-        .replace(/\s*\(c\.\s*\d+\)\s*$/i, '')   // remove "(c. ####)"
-        .replace(/\s*\(\d{4}\)\s*$/, '')        // remove "(####)"
+        .replace(/\s*[—–-].*$/, '')          // strip dash + trailing artist/year
+        .replace(/\s*\(c\.\s*\d+\)\s*$/i,'') // strip "(c. ####)"
+        .replace(/\s*\(\d{4}\)\s*$/,'')      // strip "(####)"
     );
     const hook = (chunk.match(/Hook:\s*([\s\S]*?)(?:\n\n|Analysis:|\nDominant Orange Palette:|$)/i)||[])[1]?.trim()||'';
     const analysis = (chunk.match(/Analysis:\s*([\s\S]*?)(?:\n\nDominant Orange Palette:|\nDominant Orange Palette:|$)/i)||[])[1]?.trim()||hook;
-    const hexes = [...chunk.matchAll(/#[0-9a-f]{6}/gi)].map(m=>m[0].toUpperCase());
-    entries[titleCanon] = {hook, analysis, palette:[...new Set(hexes)]};
+    const palette = [...chunk.matchAll(/#[0-9a-f]{6}/gi)].map(m=>m[0].toUpperCase());
+    entries[titleCanon] = {hook, analysis, palette:[...new Set(palette)]};
   }
   return entries;
 }
 
-/* Render paragraphs safely */
+/* -------- Render paragraphs safely -------- */
 function asParagraphs(txt){
   const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const t = (txt||'').trim(); if(!t) return '';
   return '<p>'+esc(t).replace(/\n{2,}/g,'</p><p>').replace(/\n/g,'<br>')+'</p>';
 }
 
+/* -------- Build UI -------- */
 const track = document.getElementById('track');
 const descEl = document.getElementById('desc');
 let activeIndex = 0;
 
 async function build(){
-  const txt = await loadTxt();
+  const txt = await loadDescriptionText();
   const parsed = parseEntries(txt);
   const getEntry = title => parsed[canon(title)] || parsed[ALIAS[canon(title)]||''] || null;
 
-  // build cards (with placeholder on missing image)
+  // Cards (with placeholder if image missing)
   track.appendChild(Object.assign(document.createElement('div'),{className:'spacer'}));
   PAINTINGS.forEach((p,i)=>{
     const card=document.createElement('div'); card.className='card'; card.dataset.index=i;
-    const img=new Image();
-    img.decoding='async';
+
+    const img=new Image(); img.decoding='async';
     img.onload=()=>card.appendChild(img);
-    img.onerror=()=>{
-      card.classList.add('ph');
-      card.innerHTML=`<div>No image<br><small>${p.title}</small></div>`;
-    };
+    img.onerror=()=>{ card.classList.add('ph'); card.innerHTML=`<div>No image<br><small>${p.title}</small></div>`; };
     img.src=p.src;
 
-    // single tap: center → expand
+    // Single tap: center → expand
     card.addEventListener('click', ()=>{
       const cards=[...track.querySelectorAll('.card')];
       activeIndex=i;
       cards[i]?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-      setTimeout(()=>openModal(getEntry), 220);
+      setTimeout(()=>openModal(getEntry), 220);  // let scroll settle
       updateCaption(getEntry);
     }, {passive:true});
 
@@ -190,13 +209,13 @@ async function build(){
   window.__getEntry = getEntry;
 }
 
-function cssVar(n){ return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)); }
+/* scale/activate */
+function cssVar(n){return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));}
 function updateScales(){
   const cards=[...track.querySelectorAll('.card')]; if(!cards.length) return;
   const cx=track.clientWidth/2, base=track.scrollLeft; let best=0, bestD=1e9;
   cards.forEach((el,i)=>{
-    const mid=el.offsetLeft+el.offsetWidth/2-base;
-    const d=Math.abs(mid-cx);
+    const mid=el.offsetLeft+el.offsetWidth/2-base; const d=Math.abs(mid-cx);
     if(d<bestD){bestD=d; best=i;}
     const s=cssVar('--scaleCenter')-(cssVar('--scaleCenter')-cssVar('--scaleSide'))*Math.min(1,d/(track.clientWidth*.5));
     el.style.transform=`scale(${s.toFixed(3)})`;
@@ -252,10 +271,14 @@ mWrap.addEventListener('touchend',()=>{
   dx=dy=0;
 },{passive:true});
 
+/* start */
 document.addEventListener('DOMContentLoaded', build);
 </script>
 
-<!-- Embedded descriptions (Hook + Analysis + HEX palette lines) -->
+<!-- ===== EMBEDDED FALLBACK TEXT =====
+     Paste your complete Picture_desc.txt here. On GitHub Pages, the app will
+     fetch Picture_desc.txt from the repo root; when opening locally via file://
+     this fallback block is used.  -->
 <script id="desc-data" type="text/plain">
 1. The Fighting Temeraire (1839) – J.M.W. Turner
 Hook: In Turner’s The Fighting Temeraire, an old warship glides toward its twilight under a sky ablaze with orange. The painting’s glowing sunset – equal parts beauty and melancholy – floods the scene with golden haze, casting the dying day as an elegy for the magnificent vessel’s final journey.
@@ -270,9 +293,9 @@ Dominant Orange Palette:
 #8B4513
 
 2. Impression, Sunrise (1872) – Claude Monet
-Hook: From a harbor wrapped in morning haze, a small orange sun ignites sky and water with a single pulse of color. The scene is barely drawn, but that ember turns fog into dawn.
+Hook: From a harbor wrapped in morning haze, a small orange sun ignites sky and water with a single pulse of color. The scene is barely drawn—masts, smoke, and boats dissolve into atmosphere—but that ember turns fog into dawn.
 
-Analysis: At Le Havre Monet reduces the world to air and temperature. The orange sun and its reflection are the work’s axis; by placing a warm high-chroma note in cool greys, he measures the hour more honestly than detail could. The dot reads as ignition—a modern day rising, industrial stacks in the mist.
+Analysis: At Le Havre Monet reduces the world to air and temperature. The tiny sun and its reflection are the work’s axis; by placing a warm high-chroma note in cool greys, he measures the hour more honestly than detail could. The dot reads as ignition—a modern day rising, industrial stacks in the mist.
 
 Dominant Orange Palette:
 #FF6A00
