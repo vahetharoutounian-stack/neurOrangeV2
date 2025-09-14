@@ -34,6 +34,63 @@
   #swatches{display:flex;gap:8px;flex-wrap:wrap;margin:.5rem 0 0;}
   .sw{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.14);font-size:.85rem;}
   .sw i{display:inline-block;width:16px;height:16px;border-radius:4px;border:1px solid rgba(255,255,255,.35);}
+
+  /* Added bottom navigation bar styling */
+  /* 🍊 neurOrange bottom nav (non-invasive) */
+  #no-bottomNav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    z-index: 2147483000;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: auto;
+    background: transparent;
+  }
+  .no-btn {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-weight: 800;
+    text-decoration: none;
+    color: #2b1600;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35);
+    border: 1px solid rgba(0,0,0,.35);
+    /* background gradient defined per button below */
+    box-shadow:
+      0 6px 16px rgba(0,0,0,.35),
+      inset 0 2px 0 rgba(255,255,255,.4),
+      inset 0 -2px 0 rgba(0,0,0,.18);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .no-btn:active {
+    transform: translateY(1px);
+  }
+  /* assign specific gradient backgrounds to each button */
+  #no-bottomNav .no-btn:nth-child(1) {
+    /* Pure orange gradient for Color Library */
+    background: linear-gradient(180deg, #FFC966 0%, #FFA500 35%, #CC8400 100%);
+  }
+  #no-bottomNav .no-btn:nth-child(2) {
+    /* Firefox orange gradient for Home */
+    background: linear-gradient(180deg, #FE9666 0%, #FE5000 35%, #CB4000 100%);
+  }
+  #no-bottomNav .no-btn:nth-child(3) {
+    /* Afterimage orange gradient for Illusion Lab */
+    background: linear-gradient(180deg, #FBAC78 0%, #F9751F 35%, #C75D18 100%);
+  }
+  /* keep page content visible above the footer */
+  .no-padBottom {
+    padding-bottom: 96px;
+  }
 </style>
 </head>
 <body>
@@ -183,6 +240,19 @@ mWrap.addEventListener('touchend',()=>{ if(Math.abs(dx)>40 && Math.abs(dx)>Math.
 
 document.addEventListener('DOMContentLoaded', build);
 </script>
+
+  <!-- Bottom navigation bar -->
+  <nav id="no-bottomNav" aria-label="Primary">
+    <a class="no-btn" href="https://github.com/vahetharoutounian-stack/neurOrangeV3/" target="_self" rel="noopener">Color Library</a>
+    <a class="no-btn" href="https://github.com/vahetharoutounian-stack/neurOrange/" target="_self" rel="noopener">Home</a>
+    <a class="no-btn" href="https://github.com/vahetharoutounian-stack/neurOrange/" target="_self" rel="noopener">Illusion Lab</a>
+  </nav>
+  <script>
+    // Add bottom padding so existing content isn't hidden behind the footer.
+    (function() {
+      document.body.classList.add('no-padBottom');
+    })();
+  </script>
 
 <!-- All 12 descriptions & palettes are embedded below (so it works over file:// too). -->
 <script id="desc-data" type="text/plain">
