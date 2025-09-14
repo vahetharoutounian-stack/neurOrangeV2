@@ -12,7 +12,7 @@
   #stage{position:fixed;inset:0;display:grid;place-items:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
   #frame{position:relative;height:100dvh;width:min(100dvw,calc(100dvh*9/16));border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:#000;box-shadow:0 20px 80px rgba(0,0,0,.55);}
   /* Optional background; drop a gallery.jpg next to this file if you want it */
-  #frame::before{content:"";position:absolute;inset:0;z-index:0;background:url("gallery.jpg") center/auto 100% no-repeat;filter:saturate(105%) brightness(95%);background-position:center 15%;}
+#frame::before{content:"";position:absolute;inset:0;z-index:0;background:url("gallery.jpg") center/auto 100% no-repeat;filter:saturate(105%) brightness(95%);background-position:center 25%;}
   #content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:10px;padding:0 0 10px 0;}
   .carousel{position:relative;height:var(--rowH);width:100%;background:var(--glass);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;border:1px solid rgba(255,255,255,.08);overflow:hidden;}
   #track{position:relative;width:100%;height:100%;display:flex;align-items:center;gap:var(--gap);overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scroll-snap-type:x mandatory;scroll-snap-stop:always;padding:0 var(--gap);scrollbar-width:none;touch-action:pan-x;cursor:grab;}
@@ -319,9 +319,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   <!-- Bottom navigation bar -->
   <nav id="no-bottomNav" aria-label="Primary">
-    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrange/" target="_self" rel="noopener">Color Library</a>
-    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV3/" target="_self" rel="noopener">Home</a>
-    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV3/" target="_self" rel="noopener">Illusion Lab</a>
+    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV2/" target="_self" rel="noopener">Color Library</a>
+    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrange/" target="_self" rel="noopener">Home</a>
+    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV3/#step3" target="_self" rel="noopener">Illusion Lab</a>
   </nav>
   <script>
     // Add bottom padding so existing content isn't hidden behind the footer.
