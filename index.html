@@ -49,7 +49,18 @@
   }
   #modal{position:fixed;inset:0;display:none;overflow:hidden;background:rgba(0,0,0,.88);color:#fff;z-index:9990;}
   #modal.show{display:block;}
-  #mWrap{position:absolute;inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px;}
+  #mWrap{
+    position:absolute;
+    inset:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    /* Align content to the top and enable scrolling so the full description and swatches are reachable */
+    justify-content:flex-start;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:12px;
+  }
   #mImg{max-width:min(92vw,420px);width:100%;height:auto;border:2px solid #fff;border-radius:8px;margin-bottom:12px;touch-action:none;}
   #mMeta{max-width:min(92vw,420px);width:100%;padding:0 2px;}
   #mTitle{font-weight:800;margin:.25rem 0 .35rem 0;}
@@ -319,7 +330,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   <!-- Bottom navigation bar -->
   <nav id="no-bottomNav" aria-label="Primary">
-    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV2/" target="_self" rel="noopener">Color Library</a>
+    <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV3/#step2" target="_self" rel="noopener">Color Library</a>
     <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrange/" target="_self" rel="noopener">Home</a>
     <a class="no-btn" href="https://vahetharoutounian-stack.github.io/neurOrangeV3/#step3" target="_self" rel="noopener">Illusion Lab</a>
   </nav>
